@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Smart Service Booking App",
+    "slug": "smart-service-booking-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1320"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.rampravesh.smartservicebooking",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1320"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "268fb9ed-fba5-427b-8fb8-73aa1330ffdd"
+      }
+    }
+  }
+}
