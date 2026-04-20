@@ -1,9 +1,11 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useToast } from "@/components/feedback/ToastProvider";
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -13,7 +15,6 @@ import {
   profileSchema,
 } from "@/features/profile/schemas/profileSchema";
 import { useAuthStore } from "@/store/authStore";
-import { colors, typography } from "@/theme";
 import { ProfileStackParamList } from "@/types/navigation";
 
 type Props = NativeStackScreenProps<ProfileStackParamList, "EditProfile">;
@@ -21,11 +22,12 @@ type Props = NativeStackScreenProps<ProfileStackParamList, "EditProfile">;
 export function EditProfileScreen({ navigation }: Props) {
   const session = useAuthStore((state) => state.session);
   const updateProfile = useAuthStore((state) => state.updateProfile);
+  const { showToast } = useToast();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<ProfileFormValues>({
     defaultValues: {
       userName: session?.userName ?? "",
@@ -37,8 +39,21 @@ export function EditProfileScreen({ navigation }: Props) {
   });
 
   const onSubmit = async (values: ProfileFormValues) => {
-    await updateProfile(values);
-    navigation.goBack();
+    try {
+      await updateProfile(values);
+      showToast({
+        tone: "success",
+        title: "Profile updated",
+        message: "Your account details were saved successfully.",
+      });
+      navigation.goBack();
+    } catch {
+      showToast({
+        tone: "error",
+        title: "Could not save profile",
+        message: "Please try again in a moment.",
+      });
+    }
   };
 
   return (
@@ -48,6 +63,17 @@ export function EditProfileScreen({ navigation }: Props) {
           title="Edit profile"
           subtitle="Keep account details clean and believable for a real consumer app."
         />
+      }
+      keyboardAware
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!isValid}
+            label="Save Changes"
+            loading={isSubmitting}
+            onPress={handleSubmit(onSubmit)}
+          />
+        </BottomActionBar>
       }
     >
       <Card>
@@ -93,25 +119,8 @@ export function EditProfileScreen({ navigation }: Props) {
           )}
         />
       </Card>
-
-      {isSubmitSuccessful ? (
-        <Text style={styles.success}>Profile updated successfully.</Text>
-      ) : null}
-
-      <Button
-        disabled={!isValid}
-        label="Save Changes"
-        loading={isSubmitting}
-        onPress={handleSubmit(onSubmit)}
-      />
     </AppScreen>
   );
 }
 
-const styles = StyleSheet.create({
-  success: {
-    color: colors.success500,
-    fontSize: typography.bodySm,
-    fontWeight: "700",
-  },
-});
+const styles = StyleSheet.create({});

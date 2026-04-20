@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { BookingStepCard } from "@/components/common/BookingStepCard";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -13,7 +15,7 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useAddresses } from "@/hooks/useBookings";
 import { useServiceDetail } from "@/hooks/useCatalog";
 import { useBookingDraftStore } from "@/store/bookingDraftStore";
-import { spacing } from "@/theme";
+import { colors, typography } from "@/theme";
 import { BookingStackParamList } from "@/types/navigation";
 import { calculateBookingTotal, getSelectedAddOns } from "@/utils/booking";
 import { formatCurrency, formatDuration } from "@/utils/formatters";
@@ -37,12 +39,10 @@ export function BookingSummaryScreen({ navigation }: Props) {
 
   if (!service || !address || !draft.slotLabel || !draft.dateLabel) {
     return (
-      <AppScreen
-        header={<ScreenHeader title="Booking summary" subtitle="Complete your selections first" />}
-      >
+      <AppScreen header={<ScreenHeader title="Booking summary" subtitle="Complete your selections first" />}>
         <EmptyState
           title="Booking information is incomplete"
-          description="Select a service, address, and slot to view the pricing summary."
+          description="Select a service, address, and slot to view the final booking summary."
         />
       </AppScreen>
     );
@@ -56,39 +56,51 @@ export function BookingSummaryScreen({ navigation }: Props) {
           subtitle="Review the final service, slot, address, and payment amount before checkout."
         />
       }
+      footer={
+        <BottomActionBar>
+          <Button
+            label="Choose Payment"
+            onPress={() => {
+              updateDraft({ notes });
+              navigation.navigate("PaymentMethod");
+            }}
+          />
+        </BottomActionBar>
+      }
     >
-      <BookingStepCard
-        step="STEP 1"
-        title="Service"
-        value={`${service.title} • ${formatDuration(service.durationMinutes)}`}
-      />
+      <Animated.View entering={FadeInDown.duration(240)}>
+        <BookingStepCard
+          step="STEP 1"
+          title="Service"
+          value={`${service.title} • ${formatDuration(service.durationMinutes)}`}
+        />
+      </Animated.View>
       <Button
         label="Edit Service"
         variant="ghost"
         onPress={() => navigation.navigate("ServiceDetail", { serviceId: service.id })}
       />
-      <BookingStepCard
-        step="STEP 2"
-        title="Address"
-        value={`${address.label} • ${address.line1}, ${address.city}`}
-      />
-      <Button
-        label="Edit Address"
-        variant="ghost"
-        onPress={() => navigation.navigate("AddressList")}
-      />
-      <BookingStepCard
-        step="STEP 3"
-        title="Slot"
-        value={`${draft.dateLabel} • ${draft.slotLabel}`}
-      />
-      <Button
-        label="Edit Slot"
-        variant="ghost"
-        onPress={() => navigation.navigate("SlotSelection")}
-      />
+
+      <Animated.View entering={FadeInDown.delay(80).duration(240)}>
+        <BookingStepCard
+          step="STEP 2"
+          title="Address"
+          value={`${address.label} • ${address.line1}, ${address.city}`}
+        />
+      </Animated.View>
+      <Button label="Edit Address" variant="ghost" onPress={() => navigation.navigate("AddressList")} />
+
+      <Animated.View entering={FadeInDown.delay(160).duration(240)}>
+        <BookingStepCard
+          step="STEP 3"
+          title="Slot"
+          value={`${draft.dateLabel} • ${draft.slotLabel}`}
+        />
+      </Animated.View>
+      <Button label="Edit Slot" variant="ghost" onPress={() => navigation.navigate("SlotSelection")} />
 
       <Card>
+        <Text style={styles.sectionLabel}>Additional notes</Text>
         <Input
           label="Notes for the professional"
           multiline
@@ -101,6 +113,7 @@ export function BookingSummaryScreen({ navigation }: Props) {
       </Card>
 
       <Card>
+        <Text style={styles.sectionLabel}>Price breakdown</Text>
         <InfoRow label="Service package" value={formatCurrency(service.basePrice)} />
         {selectedAddOns.map((addOn) => (
           <InfoRow key={addOn.id} label={addOn.title} value={formatCurrency(addOn.price)} />
@@ -108,22 +121,15 @@ export function BookingSummaryScreen({ navigation }: Props) {
         <InfoRow label="Platform fee" value={formatCurrency(pricing.platformFee)} />
         <InfoRow emphasized label="To pay" value={formatCurrency(pricing.total)} />
       </Card>
-
-      <View style={styles.actions}>
-        <Button
-          label="Choose Payment"
-          onPress={() => {
-            updateDraft({ notes });
-            navigation.navigate("PaymentMethod");
-          }}
-        />
-      </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  actions: {
-    marginTop: spacing.sm,
+  sectionLabel: {
+    color: colors.textPrimary,
+    fontSize: typography.bodySm,
+    fontWeight: "800",
+    letterSpacing: 0.4,
   },
 });

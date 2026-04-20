@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useToast } from "@/components/feedback/ToastProvider";
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -19,6 +21,7 @@ export function CancelBookingScreen({ navigation, route }: Props) {
   const [selectedReason, setSelectedReason] = useState<string>();
   const { data: booking } = useBookingDetail(bookingId);
   const cancelMutation = useCancelBooking();
+  const { showToast } = useToast();
 
   if (!bookingId || !booking) {
     return (
@@ -36,8 +39,21 @@ export function CancelBookingScreen({ navigation, route }: Props) {
       return;
     }
 
-    await cancelMutation.mutateAsync({ bookingId, reason: selectedReason });
-    navigation.replace("UpcomingBookingDetail", { bookingId });
+    try {
+      await cancelMutation.mutateAsync({ bookingId, reason: selectedReason });
+      showToast({
+        tone: "success",
+        title: "Booking cancelled",
+        message: "Your booking status has been updated successfully.",
+      });
+      navigation.replace("UpcomingBookingDetail", { bookingId });
+    } catch {
+      showToast({
+        tone: "error",
+        title: "Cancellation failed",
+        message: "Please try again in a moment.",
+      });
+    }
   };
 
   return (
@@ -48,13 +64,25 @@ export function CancelBookingScreen({ navigation, route }: Props) {
           subtitle="Surface policy clarity before the user confirms cancellation."
         />
       }
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!selectedReason}
+            label="Confirm Cancellation"
+            loading={cancelMutation.isPending}
+            onPress={handleCancel}
+          />
+        </BottomActionBar>
+      }
     >
       <Card>
         <Text style={styles.title}>{booking.serviceTitle}</Text>
         <Text style={styles.copy}>
           {booking.dateLabel} • {booking.slotLabel}
         </Text>
-        <Text style={styles.copy}>Refund, if applicable, will reflect within 3-5 business days.</Text>
+        <Text style={styles.copy}>
+          Refund, if applicable, will reflect within 3-5 business days.
+        </Text>
       </Card>
 
       <Card>
@@ -71,13 +99,6 @@ export function CancelBookingScreen({ navigation, route }: Props) {
           </Pressable>
         ))}
       </Card>
-
-      <Button
-        disabled={!selectedReason}
-        label="Confirm Cancellation"
-        loading={cancelMutation.isPending}
-        onPress={handleCancel}
-      />
     </AppScreen>
   );
 }

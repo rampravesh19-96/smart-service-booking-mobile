@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BookingNavigator } from "@/navigation/BookingNavigator";
 import { BookingsNavigator } from "@/navigation/BookingsNavigator";
@@ -8,6 +9,8 @@ import { colors, radius, spacing, typography } from "@/theme";
 import { MainTabParamList } from "@/types/navigation";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const BASE_TAB_BAR_HEIGHT = 60;
+const ANDROID_EXTRA_BOTTOM_SPACING = 10;
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   return (
@@ -18,14 +21,28 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 }
 
 export function MainTabsNavigator() {
+  const insets = useSafeAreaInsets();
+  const extraBottomInset = Platform.OS === "android" ? ANDROID_EXTRA_BOTTOM_SPACING : 0;
+  const bottomInset = Math.max(insets.bottom, spacing.sm) + extraBottomInset;
+  const tabBarHeight = BASE_TAB_BAR_HEIGHT + bottomInset;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: colors.white,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: styles.tabBarLabel,
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: tabBarHeight,
+            paddingTop: spacing.sm,
+            paddingBottom: bottomInset,
+          },
+        ],
       }}
     >
       <Tab.Screen
@@ -60,13 +77,15 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.surfacePrimary,
     borderTopColor: colors.borderSoft,
-    height: 76,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
+    borderTopWidth: 1,
+  },
+  tabBarItem: {
+    paddingBottom: Platform.OS === "android" ? 2 : 0,
   },
   tabBarLabel: {
     fontSize: typography.caption,
     fontWeight: "700",
+    marginTop: Platform.OS === "android" ? 0 : 2,
   },
   icon: {
     width: 34,

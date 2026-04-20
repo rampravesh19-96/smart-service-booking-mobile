@@ -3,7 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useToast } from "@/components/feedback/ToastProvider";
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -20,6 +22,7 @@ import { AuthStackParamList } from "@/types/navigation";
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 export function LoginScreen({ navigation }: Props) {
+  const { showToast } = useToast();
   const {
     control,
     handleSubmit,
@@ -31,6 +34,11 @@ export function LoginScreen({ navigation }: Props) {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    showToast({
+      tone: "info",
+      title: "OTP sent",
+      message: "Use 123456 for the demo verification flow.",
+    });
     navigation.navigate("OtpVerify", { phoneNumber: `+91 ${values.phoneNumber}` });
   };
 
@@ -43,13 +51,24 @@ export function LoginScreen({ navigation }: Props) {
         />
       }
       scrollable={false}
+      keyboardAware
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!isValid}
+            label="Send OTP"
+            loading={isSubmitting}
+            onPress={handleSubmit(onSubmit)}
+          />
+        </BottomActionBar>
+      }
     >
       <View style={styles.content}>
         <Card>
           <Badge label="Frontend-first auth flow" />
           <Text style={styles.title}>Continue with your mobile number</Text>
           <Text style={styles.copy}>
-            We’ll use OTP verification for a low-friction sign in experience.
+            We'll use OTP verification for a low-friction sign in experience.
           </Text>
           <Controller
             control={control}
@@ -77,13 +96,6 @@ export function LoginScreen({ navigation }: Props) {
           </Text>
         </Card>
       </View>
-
-      <Button
-        disabled={!isValid}
-        label="Send OTP"
-        loading={isSubmitting}
-        onPress={handleSubmit(onSubmit)}
-      />
     </AppScreen>
   );
 }

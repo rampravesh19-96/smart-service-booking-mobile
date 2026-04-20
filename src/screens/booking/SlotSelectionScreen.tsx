@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,7 +10,7 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
 import { useSlotOptions } from "@/hooks/useCatalog";
 import { useBookingDraftStore } from "@/store/bookingDraftStore";
-import { colors, radius, spacing, typography } from "@/theme";
+import { colors, typography } from "@/theme";
 import { BookingStackParamList } from "@/types/navigation";
 
 type Props = NativeStackScreenProps<BookingStackParamList, "SlotSelection">;
@@ -26,6 +27,15 @@ export function SlotSelectionScreen({ navigation }: Props) {
           title="Choose a slot"
           subtitle="Clear availability cues make booking feel reliable and premium."
         />
+      }
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!draft.slotId}
+            label="Continue to Summary"
+            onPress={() => navigation.navigate("BookingSummary")}
+          />
+        </BottomActionBar>
       }
     >
       {!draft.serviceId ? (
@@ -69,12 +79,6 @@ export function SlotSelectionScreen({ navigation }: Props) {
           );
         })
       )}
-
-      <Button
-        disabled={!draft.slotId}
-        label="Continue to Summary"
-        onPress={() => navigation.navigate("BookingSummary")}
-      />
     </AppScreen>
   );
 }

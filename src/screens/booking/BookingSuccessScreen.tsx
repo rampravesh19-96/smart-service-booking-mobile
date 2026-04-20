@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
@@ -24,66 +26,88 @@ export function BookingSuccessScreen({ navigation, route }: Props) {
           subtitle="The final state gives users confidence immediately after checkout."
         />
       }
+      footer={
+        <BottomActionBar>
+          <Button
+            label="View Booking"
+            onPress={() => {
+              const parentNavigation = navigation.getParent() as NavigationProp<ParamListBase>;
+              parentNavigation?.navigate("BookingsTab", {
+                screen: "UpcomingBookingDetail",
+                params: { bookingId: route.params?.bookingId },
+              });
+            }}
+          />
+          <Button label="Back to Home" variant="secondary" onPress={() => navigation.popToTop()} />
+        </BottomActionBar>
+      }
     >
-      <Card>
-        <Text style={styles.mark}>CONFIRMED</Text>
-        <Text style={styles.title}>
-          {booking?.serviceTitle ?? "Your booking is confirmed"}
-        </Text>
-        <Text style={styles.copy}>
-          {booking
-            ? `${booking.dateLabel} • ${booking.slotLabel}`
-            : "Your selected slot has been reserved."}
-        </Text>
-        <Text style={styles.copy}>{booking?.addressLabel}</Text>
-        <Text style={styles.amount}>
-          {booking ? formatCurrency(booking.amount) : "Payment captured"}
-        </Text>
-      </Card>
+      <Animated.View entering={ZoomIn.springify()}>
+        <Card style={styles.successCard}>
+          <View style={styles.markBadge}>
+            <Text style={styles.mark}>CONFIRMED</Text>
+          </View>
+          <Text style={styles.title}>{booking?.serviceTitle ?? "Your booking is confirmed"}</Text>
+          <Text style={styles.copy}>
+            {booking
+              ? `${booking.dateLabel} • ${booking.slotLabel}`
+              : "Your selected slot has been reserved."}
+          </Text>
+          <Text style={styles.copy}>{booking?.addressLabel}</Text>
+          <Text style={styles.amount}>
+            {booking ? formatCurrency(booking.amount) : "Payment captured"}
+          </Text>
+        </Card>
+      </Animated.View>
 
-      <View style={styles.actions}>
-        <Button
-          label="View Booking"
-          onPress={() => {
-            const parentNavigation =
-              navigation.getParent() as NavigationProp<ParamListBase>;
-            parentNavigation?.navigate("BookingsTab", {
-              screen: "UpcomingBookingDetail",
-              params: { bookingId: route.params?.bookingId },
-            });
-          }}
-        />
-        <Button
-          label="Back to Home"
-          variant="secondary"
-          onPress={() => navigation.popToTop()}
-        />
-      </View>
+      <Animated.View entering={FadeInUp.delay(140).duration(320)}>
+        <Card>
+          <Text style={styles.sectionTitle}>What happens next</Text>
+          <Text style={styles.copy}>
+            You can track the booking status, review the timeline, and reschedule if needed from the booking detail screen.
+          </Text>
+        </Card>
+      </Animated.View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  markBadge: {
+    alignSelf: "center",
+    backgroundColor: "rgba(23, 178, 106, 0.14)",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 999,
+  },
   mark: {
     color: colors.success500,
     fontSize: typography.caption,
     fontWeight: "800",
   },
+  successCard: {
+    alignItems: "center",
+  },
   title: {
     color: colors.textPrimary,
     fontSize: typography.h2,
     fontWeight: "800",
+    textAlign: "center",
   },
   copy: {
     color: colors.textSecondary,
     fontSize: typography.body,
+    textAlign: "center",
+    lineHeight: 22,
   },
   amount: {
     color: colors.white,
     fontSize: typography.h3,
     fontWeight: "800",
   },
-  actions: {
-    gap: spacing.md,
+  sectionTitle: {
+    color: colors.textPrimary,
+    fontSize: typography.body,
+    fontWeight: "800",
   },
 });

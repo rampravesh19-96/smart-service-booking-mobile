@@ -1,5 +1,11 @@
 import { PropsWithChildren, ReactNode } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,6 +15,8 @@ type AppScreenProps = PropsWithChildren<{
   header?: ReactNode;
   scrollable?: boolean;
   padded?: boolean;
+  footer?: ReactNode;
+  keyboardAware?: boolean;
 }>;
 
 export function AppScreen({
@@ -16,6 +24,8 @@ export function AppScreen({
   header,
   scrollable = true,
   padded = true,
+  footer,
+  keyboardAware = false,
 }: AppScreenProps) {
   const content = (
     <View style={[styles.content, padded && styles.padded]}>{children}</View>
@@ -23,18 +33,31 @@ export function AppScreen({
 
   return (
     <LinearGradient colors={[colors.brand900, colors.brand800]} style={styles.root}>
-      <SafeAreaView edges={["top"]} style={styles.safeArea}>
-        {header}
-        {scrollable ? (
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {content}
-          </ScrollView>
-        ) : (
-          content
-        )}
+      <SafeAreaView edges={footer ? ["top"] : ["top", "bottom"]} style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={
+            keyboardAware ? Platform.select({ ios: "padding", android: "height" }) : undefined
+          }
+          keyboardVerticalOffset={keyboardAware ? spacing.md : 0}
+          style={styles.keyboardContainer}
+        >
+          {header}
+          {scrollable ? (
+            <ScrollView
+              contentContainerStyle={[
+                styles.scrollContent,
+                footer ? styles.scrollContentWithFooter : null,
+              ]}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {content}
+            </ScrollView>
+          ) : (
+            content
+          )}
+          {footer}
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -47,14 +70,21 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  keyboardContainer: {
+    flex: 1,
+  },
   scrollContent: {
     paddingBottom: spacing["3xl"],
+  },
+  scrollContentWithFooter: {
+    paddingBottom: spacing.xl,
   },
   content: {
     flexGrow: 1,
   },
   padded: {
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
     gap: spacing.lg,
   },
 });

@@ -1,7 +1,9 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -14,17 +16,19 @@ import {
 import { useCreateAddress } from "@/hooks/useBookings";
 import { useBookingDraftStore } from "@/store/bookingDraftStore";
 import { BookingStackParamList } from "@/types/navigation";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<BookingStackParamList, "AddAddress">;
 
 export function AddAddressScreen({ navigation }: Props) {
-  const { control, handleSubmit, formState: { errors, isSubmitting, isValid } } =
-    useForm<AddressFormValues>({
-      defaultValues: addressFormDefaults,
-      resolver: zodResolver(addressSchema),
-      mode: "onChange",
-    });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<AddressFormValues>({
+    defaultValues: addressFormDefaults,
+    resolver: zodResolver(addressSchema),
+    mode: "onChange",
+  });
   const createAddressMutation = useCreateAddress();
   const updateDraft = useBookingDraftStore((state) => state.updateDraft);
 
@@ -36,7 +40,23 @@ export function AddAddressScreen({ navigation }: Props) {
 
   return (
     <AppScreen
-      header={<ScreenHeader title="Add Address" subtitle="Validated address capture for the booking flow." />}
+      header={
+        <ScreenHeader
+          title="Add Address"
+          subtitle="Validated address capture for the booking flow."
+        />
+      }
+      keyboardAware
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!isValid}
+            label="Save Address"
+            loading={isSubmitting || createAddressMutation.isPending}
+            onPress={handleSubmit(onSubmit)}
+          />
+        </BottomActionBar>
+      }
     >
       <Card>
         <Controller
@@ -98,13 +118,6 @@ export function AddAddressScreen({ navigation }: Props) {
           )}
         />
       </Card>
-
-      <Button
-        disabled={!isValid}
-        label="Save Address"
-        loading={isSubmitting || createAddressMutation.isPending}
-        onPress={handleSubmit(onSubmit)}
-      />
     </AppScreen>
   );
 }

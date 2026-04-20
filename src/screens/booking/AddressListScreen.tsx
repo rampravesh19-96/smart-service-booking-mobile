@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,7 +10,7 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
 import { useAddresses } from "@/hooks/useBookings";
 import { useBookingDraftStore } from "@/store/bookingDraftStore";
-import { colors, radius, spacing, typography } from "@/theme";
+import { colors, typography } from "@/theme";
 import { BookingStackParamList } from "@/types/navigation";
 
 type Props = NativeStackScreenProps<BookingStackParamList, "AddressList">;
@@ -29,6 +30,15 @@ export function AddressListScreen({ navigation }: Props) {
           onActionPress={() => navigation.navigate("AddAddress")}
         />
       }
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!selectedAddressId}
+            label="Continue to Slots"
+            onPress={() => navigation.navigate("SlotSelection")}
+          />
+        </BottomActionBar>
+      }
     >
       {isLoading ? (
         <>
@@ -47,10 +57,7 @@ export function AddressListScreen({ navigation }: Props) {
         />
       ) : (
         data.map((address) => (
-          <Pressable
-            key={address.id}
-            onPress={() => updateDraft({ addressId: address.id })}
-          >
+          <Pressable key={address.id} onPress={() => updateDraft({ addressId: address.id })}>
             <Card style={selectedAddressId === address.id ? styles.selectedCard : undefined}>
               <Text style={styles.title}>
                 {address.label} {address.isDefault ? "• Default" : ""}
@@ -62,12 +69,6 @@ export function AddressListScreen({ navigation }: Props) {
           </Pressable>
         ))
       )}
-
-      <Button
-        disabled={!selectedAddressId}
-        label="Continue to Slots"
-        onPress={() => navigation.navigate("SlotSelection")}
-      />
     </AppScreen>
   );
 }

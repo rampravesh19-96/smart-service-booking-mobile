@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useToast } from "@/components/feedback/ToastProvider";
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -20,6 +22,7 @@ export function RescheduleBookingScreen({ navigation, route }: Props) {
   const { data: slots } = useSlotOptions(booking?.serviceId);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const rescheduleMutation = useRescheduleBooking();
+  const { showToast } = useToast();
 
   if (!bookingId || !booking) {
     return (
@@ -39,12 +42,25 @@ export function RescheduleBookingScreen({ navigation, route }: Props) {
       return;
     }
 
-    await rescheduleMutation.mutateAsync({
-      bookingId,
-      dateLabel: selectedSlot.dateLabel,
-      slotLabel: selectedSlot.slotLabel,
-    });
-    navigation.replace("UpcomingBookingDetail", { bookingId });
+    try {
+      await rescheduleMutation.mutateAsync({
+        bookingId,
+        dateLabel: selectedSlot.dateLabel,
+        slotLabel: selectedSlot.slotLabel,
+      });
+      showToast({
+        tone: "success",
+        title: "Booking rescheduled",
+        message: `New slot saved for ${selectedSlot.dateLabel}.`,
+      });
+      navigation.replace("UpcomingBookingDetail", { bookingId });
+    } catch {
+      showToast({
+        tone: "error",
+        title: "Reschedule failed",
+        message: "Please try a different slot or retry in a moment.",
+      });
+    }
   };
 
   return (
@@ -55,6 +71,16 @@ export function RescheduleBookingScreen({ navigation, route }: Props) {
           subtitle="Reselection flow with clear available slot options."
         />
       }
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!selectedSlot}
+            label="Confirm New Slot"
+            loading={rescheduleMutation.isPending}
+            onPress={handleReschedule}
+          />
+        </BottomActionBar>
+      }
     >
       <Card>
         <Text style={styles.title}>{booking.serviceTitle}</Text>
@@ -64,10 +90,7 @@ export function RescheduleBookingScreen({ navigation, route }: Props) {
       </Card>
 
       {(slots ?? []).map((slot) => (
-        <Pressable
-          key={slot.id}
-          onPress={() => setSelectedSlotId(slot.id)}
-        >
+        <Pressable key={slot.id} onPress={() => setSelectedSlotId(slot.id)}>
           <Card style={selectedSlotId === slot.id ? styles.selectedCard : undefined}>
             <Text style={styles.title}>{slot.displayDate}</Text>
             <Text style={styles.copy}>{slot.slotLabel}</Text>
@@ -77,13 +100,6 @@ export function RescheduleBookingScreen({ navigation, route }: Props) {
           </Card>
         </Pressable>
       ))}
-
-      <Button
-        disabled={!selectedSlot}
-        label="Confirm New Slot"
-        loading={rescheduleMutation.isPending}
-        onPress={handleReschedule}
-      />
     </AppScreen>
   );
 }

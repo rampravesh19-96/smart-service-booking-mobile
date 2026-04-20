@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSoft,
     borderRadius: radius.lg,
-    padding: spacing.lg,
+    padding: spacing.xl,
     gap: spacing.md,
     ...shadows.card,
   },

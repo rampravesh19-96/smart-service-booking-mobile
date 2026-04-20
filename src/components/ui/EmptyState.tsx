@@ -10,6 +10,7 @@ type EmptyStateProps = {
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
     <View style={styles.container}>
+      <Text style={styles.eyebrow}>NO RESULT</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
     </View>
@@ -25,10 +26,16 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.sm,
   },
+  eyebrow: {
+    color: colors.accent400,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+  },
   title: {
     color: colors.textPrimary,
     fontSize: typography.h3,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   description: {
     color: colors.textSecondary,

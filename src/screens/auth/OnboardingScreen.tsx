@@ -4,6 +4,7 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -20,7 +21,14 @@ const highlights = [
 
 export function OnboardingScreen({ navigation }: Props) {
   return (
-    <AppScreen scrollable={false}>
+    <AppScreen
+      scrollable={false}
+      footer={
+        <BottomActionBar>
+          <Button label="Continue to Login" onPress={() => navigation.navigate("Login")} />
+        </BottomActionBar>
+      }
+    >
       <Animated.View entering={FadeInUp.duration(500)} style={styles.hero}>
         <LinearGradient colors={[colors.accent500, colors.brand700]} style={styles.heroCard}>
           <Badge label="Smart Service Booking" />
@@ -33,20 +41,13 @@ export function OnboardingScreen({ navigation }: Props) {
 
       <View style={styles.featureList}>
         {highlights.map((item, index) => (
-          <Animated.View
-            entering={FadeInDown.delay(120 * index).duration(450)}
-            key={item}
-          >
+          <Animated.View entering={FadeInDown.delay(120 * index).duration(450)} key={item}>
             <Card style={styles.featureCard}>
               <Text style={styles.featureIndex}>{`0${index + 1}`}</Text>
               <Text style={styles.featureText}>{item}</Text>
             </Card>
           </Animated.View>
         ))}
-      </View>
-
-      <View style={styles.footer}>
-        <Button label="Continue to Login" onPress={() => navigation.navigate("Login")} />
       </View>
     </AppScreen>
   );
@@ -96,8 +97,5 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     fontWeight: "600",
     lineHeight: 22,
-  },
-  footer: {
-    paddingBottom: spacing["3xl"],
   },
 });

@@ -3,6 +3,7 @@
     "name": "Smart Service Booking App",
     "slug": "smart-service-booking-app",
     "version": "1.0.0",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
@@ -13,7 +14,14 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "tez",
+          "phonepe",
+          "paytmmp"
+        ]
+      }
     },
     "android": {
       "package": "com.rampravesh.smartservicebooking",
@@ -22,6 +30,7 @@
       }
     },
     "plugins": [
+      "expo-dev-client",
       "expo-secure-store"
     ],
     "extra": {

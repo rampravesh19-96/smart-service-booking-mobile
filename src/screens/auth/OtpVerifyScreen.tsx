@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useToast } from "@/components/feedback/ToastProvider";
 import { AppScreen } from "@/components/layout/AppScreen";
+import { BottomActionBar } from "@/components/layout/BottomActionBar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -22,6 +24,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, "OtpVerify">;
 
 export function OtpVerifyScreen({ route }: Props) {
   const signIn = useAuthStore((state) => state.signIn);
+  const { showToast } = useToast();
   const [secondsLeft, setSecondsLeft] = useState(25);
   const phoneNumber = route.params?.phoneNumber ?? "+91 9876543210";
   const {
@@ -43,8 +46,22 @@ export function OtpVerifyScreen({ route }: Props) {
     return () => clearTimeout(timer);
   }, [secondsLeft]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: OtpFormValues) => {
+    if (values.otp !== "123456") {
+      showToast({
+        tone: "error",
+        title: "Incorrect OTP",
+        message: "For this demo build, enter 123456 to continue.",
+      });
+      return;
+    }
+
     await signIn(phoneNumber);
+    showToast({
+      tone: "success",
+      title: "Signed in",
+      message: "Welcome back. Your session has been restored locally.",
+    });
   };
 
   return (
@@ -56,6 +73,17 @@ export function OtpVerifyScreen({ route }: Props) {
         />
       }
       scrollable={false}
+      keyboardAware
+      footer={
+        <BottomActionBar>
+          <Button
+            disabled={!isValid}
+            label="Verify and Continue"
+            loading={isSubmitting}
+            onPress={handleSubmit(onSubmit)}
+          />
+        </BottomActionBar>
+      }
     >
       <View style={styles.content}>
         <Card>
@@ -83,13 +111,6 @@ export function OtpVerifyScreen({ route }: Props) {
           </Text>
         </Card>
       </View>
-
-      <Button
-        disabled={!isValid}
-        label="Verify and Continue"
-        loading={isSubmitting}
-        onPress={handleSubmit(onSubmit)}
-      />
     </AppScreen>
   );
 }

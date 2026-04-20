@@ -12,7 +12,9 @@ type BookingStepCardProps = {
 export function BookingStepCard({ step, title, value }: BookingStepCardProps) {
   return (
     <Card>
-      <Text style={styles.step}>{step}</Text>
+      <View style={styles.stepPill}>
+        <Text style={styles.step}>{step}</Text>
+      </View>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.divider} />
       <Text style={styles.value}>{value}</Text>
@@ -21,6 +23,13 @@ export function BookingStepCard({ step, title, value }: BookingStepCardProps) {
 }
 
 const styles = StyleSheet.create({
+  stepPill: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(44, 140, 255, 0.12)",
+    borderRadius: 999,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
   step: {
     color: colors.accent400,
     fontSize: typography.caption,
