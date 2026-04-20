@@ -42,22 +42,44 @@ export function useCompleteBookingPayment() {
         },
       };
 
-      const order = await createPaymentOrder({
-        amount: payload.amount * 100,
-        currency: intent.currency,
-        receipt: intent.receipt,
-        notes: intent.notes,
-      });
+      let order;
+
+      try {
+        order = await createPaymentOrder({
+          amount: payload.amount * 100,
+          currency: intent.currency,
+          receipt: intent.receipt,
+          notes: intent.notes,
+        });
+      } catch (error) {
+        throw new Error(
+          error instanceof Error
+            ? error.message
+            : "Could not create the payment order. Please try again.",
+        );
+      }
 
       const checkoutResult = await openRazorpayCheckout({
         order,
         intent,
       });
 
-      const verification = await verifyPaymentResult(checkoutResult);
+      let verification;
+
+      try {
+        verification = await verifyPaymentResult(checkoutResult);
+      } catch (error) {
+        throw new Error(
+          error instanceof Error
+            ? error.message
+            : "Payment verification could not be completed. Please try again.",
+        );
+      }
 
       if (!verification.verified) {
-        throw new Error("Payment verification failed. Please contact support if money was deducted.");
+        throw new Error(
+          "Payment verification failed after checkout. If money was deducted, please contact support with your Razorpay payment ID.",
+        );
       }
 
       const booking = await createBooking({

@@ -7,6 +7,14 @@ This small local server provides the backend-style contract required for Razorpa
 
 It keeps Razorpay secret keys off the React Native client while still allowing real Razorpay test-mode checkout.
 
+For the shared app demo path, use the deployed Render backend:
+
+```text
+https://smart-service-booking-mobile.onrender.com
+```
+
+This local backend is only for optional local development or backend debugging.
+
 ## Run
 
 1. Add your Razorpay backend keys either to the project root `.env` or to `demo-backend/.env`.

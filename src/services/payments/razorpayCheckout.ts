@@ -1,6 +1,6 @@
 import RazorpayCheckout from "react-native-razorpay";
 
-import { assertClientPaymentConfig, paymentConfig } from "@/config/payments";
+import { assertClientPaymentConfig, getPaymentConfig } from "@/config/payments";
 import {
   BookingPaymentIntent,
   PaymentOrderResponse,
@@ -39,6 +39,7 @@ export async function openRazorpayCheckout(params: {
   intent: BookingPaymentIntent;
 }): Promise<RazorpayPaymentSuccess> {
   assertClientPaymentConfig();
+  const paymentConfig = getPaymentConfig();
 
   const { order, intent } = params;
 

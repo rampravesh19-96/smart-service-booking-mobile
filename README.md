@@ -111,17 +111,26 @@ npm start
 
 For native Razorpay payment testing, use an Expo development build instead of Expo Go.
 
-```bash
-npm run payments:server
-npm run payments:lan-ip
-```
-
 Set your app env like this before starting Metro:
 
 ```bash
 EXPO_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxx
-EXPO_PUBLIC_PAYMENTS_API_BASE_URL=http://YOUR_LAN_IP:8787
+EXPO_PUBLIC_PAYMENTS_API_BASE_URL=https://smart-service-booking-mobile.onrender.com
 ```
+
+Important Expo env note:
+
+- `EXPO_PUBLIC_*` values are read into the client bundle, not fetched live from `.env` at runtime
+- if you change `.env` while Metro is already running, restart Metro
+- if your installed dev build / APK was created before the env was present, make a fresh build after updating the env
+
+Before triggering an EAS build, run:
+
+```bash
+npm run payments:preflight
+```
+
+It validates that the Razorpay public key exists, the payments base URL resolves, and the app is not pointing at localhost.
 
 Then start the app:
 
@@ -155,7 +164,7 @@ Use these sections for screenshots, a portfolio case study, or recruiter demo cl
 
 This project intentionally stays frontend-first.
 
-- Payment uses real Razorpay test checkout with a demo local backend for order creation and verification
+- Payment uses real Razorpay test checkout with a deployed Render backend for order creation and verification
 - Support is mock-based
 - AI is mock-assisted and limited to one feature
 - The architecture is ready for backend integration without needing a UI rewrite
