@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "package": "com.rampravesh.smartservicebooking",
+      "package": "com.rampravesh.smartservicebookingapp",
       "adaptiveIcon": {
         "backgroundColor": "#0B1320"
       }
